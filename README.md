@@ -1,9 +1,6 @@
 # Lift-Simulation
 Simulation of Lift mechanics using simple HTML, CSS and JavaScript
 
-# UI Example
-![Lift Simulation Example](Lift-Simulation-Example.png "Lift Simulation Example")
-
 # Requirements
   1. Have a page where you input the number of floors and lifts from the user
   2. An interactive UI is generated, where we have visual depictions of lifts and buttons on floors
