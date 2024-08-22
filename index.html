@@ -10,22 +10,32 @@
     <header class="header">
       <h2>Lift Simulation</h2>
     </header>
-    <main>
-      <section class="input-btn-container">
+    <main class="main">
+      <form id="form" class="input-btn-container">
         <div class="input-container">
           <div class="input-group">
-            <label for="floors">Number of floors: </label>
-            <input type="number" id="floors" name="floors" />
+            <label for="input-floors-count">Number of floors: </label>
+            <input
+              type="number"
+              min="2"
+              id="input-floors-count"
+              name="input-floors-count"
+            />
           </div>
           <div class="input-group">
-            <label for="lifts">Number of Lifts: </label>
-            <input type="number" id="lifts" name="lifts" />
+            <label for="input-lifts-count">Number of Lifts: </label>
+            <input
+              min="1"
+              type="number"
+              id="input-lifts-count"
+              name="input-lifts-count"
+            />
           </div>
         </div>
+        <button id="input-btn" class="input-btn">Simulate!</button>
+      </form>
 
-        <button class="input-btn">Simulate!</button>
-      </section>
-      <section id="simulation-container"></section>
+      <section id="simulation-container" class="simulation-container"></section>
     </main>
     <script src="script.js"></script>
   </body>
