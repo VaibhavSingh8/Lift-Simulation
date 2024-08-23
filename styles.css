@@ -9,6 +9,7 @@
     --color-background: #f7f7f7;
     --color-text: #333;
     --color-border: #ccc;
+    --door-animation-time: 5s;
 }
 
 body {
@@ -120,7 +121,7 @@ body {
     width: 50%;
     height: 100%;
     background-color: #444;
-    transition: transform 2.5s ease-in-out;
+    transition: transform var(--door-animation-time) ease-in-out;
 }
 
 .lift__door-left {
@@ -152,4 +153,28 @@ body {
     border: none;
     border-radius: 3px;
     cursor: pointer;
+}
+
+@media (max-width: 480px) {
+    .main {
+        padding: 10px;
+    }
+
+    :root {
+        --lift-width: 30px;
+    }
+
+    .control-button {
+        padding: 2px 4px;
+        font-size: 0.7em;
+    }
+
+    .lift-container{
+        left:4rem;
+        right:4rem;
+    }
+
+    .floor-number {
+        font-size: 0.7em;
+    }
 }
