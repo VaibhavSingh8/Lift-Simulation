@@ -9,20 +9,34 @@ let liftRequestQueue = [];
 const simulateBtn = document.querySelector(".input-btn");
 const simulationContainer = document.getElementById("simulation-container");
 
+function getFloorLabel(floorNumber) {
+  if (floorNumber > 0) {
+    return `Floor ${floorNumber}`;
+  } else if (floorNumber < 0) {
+    return `Basement ${Math.abs(floorNumber)}`;
+  } else {
+    return `Ground Floor`;
+  }
+}
+
 function initializeSimulation(numberOfFloors, numberOfLifts) {
   simulationContainer.innerHTML = "";
   lifts = [];
   liftRequestQueue = [];
 
+  const lowestFloor = Math.min(0, numberOfFloors);
+  const highestFloor = Math.max(0, numberOfFloors);
+  const totalFloors = Math.abs(highestFloor) + Math.abs(lowestFloor) + 1;
+
   // Create floors
-  for (let i = numberOfFloors; i > 0; i--) {
+  for (let i = highestFloor; i >= lowestFloor; i--) {
     const floorDiv = document.createElement("div");
     floorDiv.classList.add("floor");
 
     const controlBtnWrapper = document.createElement("div");
     controlBtnWrapper.classList.add("control-btn-wrapper");
 
-    if (i < numberOfFloors) {
+    if (i < highestFloor) {
       const upButton = document.createElement("button");
       upButton.classList.add("control-button");
       upButton.textContent = "UP";
@@ -30,11 +44,14 @@ function initializeSimulation(numberOfFloors, numberOfLifts) {
       controlBtnWrapper.appendChild(upButton);
     }
 
-    if (i > 1) {
+    if (i > lowestFloor) {
       const downButton = document.createElement("button");
       downButton.classList.add("control-button");
       downButton.textContent = "DOWN";
-      downButton.addEventListener("click", () => requestLift(i, "down"));
+      downButton.addEventListener("click", () => {
+        console.log(i);
+        requestLift(i, "down");
+      });
       controlBtnWrapper.appendChild(downButton);
     }
 
@@ -42,7 +59,7 @@ function initializeSimulation(numberOfFloors, numberOfLifts) {
 
     const floorNumber = document.createElement("div");
     floorNumber.classList.add("floor-number");
-    floorNumber.textContent = `Floor ${i}`;
+    floorNumber.textContent = getFloorLabel(i);
     floorDiv.appendChild(floorNumber);
 
     simulationContainer.appendChild(floorDiv);
@@ -53,7 +70,7 @@ function initializeSimulation(numberOfFloors, numberOfLifts) {
   liftContainer.classList.add("lift-container");
 
   const floorHeight = 100;
-  const totalHeight = floorHeight * numberOfFloors;
+  const totalHeight = floorHeight * totalFloors;
   liftContainer.style.height = `${totalHeight}px`;
 
   for (let i = 1; i <= numberOfLifts; i++) {
@@ -76,11 +93,14 @@ function initializeSimulation(numberOfFloors, numberOfLifts) {
 
     liftDiv.style.left = `${spacing * i - liftWidth / 2}px`;
 
+    const groundFloorOffset = Math.abs(lowestFloor) * floorHeight;
+    liftDiv.style.transform = `translateY(-${groundFloorOffset}px)`;
+
     liftContainer.appendChild(liftDiv);
 
     const liftStateObj = {
       id: `lift-${i}`,
-      currentFloor: 1,
+      currentFloor: 0,
       targetFloor: null,
       moving: false,
       direction: null,
@@ -116,7 +136,7 @@ function findNearestAvailableLift(floor) {
 
   for (const lift of lifts) {
     if (!lift.moving) {
-      const distance = Math.abs(lift.currentFloor - floor);
+      const distance = Math.abs(lift.currentFloor - floor + 1);
       if (distance < shortestDistance) {
         shortestDistance = distance;
         nearestLift = lift;
@@ -125,6 +145,13 @@ function findNearestAvailableLift(floor) {
   }
 
   return nearestLift;
+}
+
+function moveLift(lift) {
+  if (!lift.moving && !lift.doorsOperating) {
+    lift.moving = true;
+    moveToNextFloor(lift);
+  }
 }
 
 function openLiftDoors(lift) {
@@ -150,13 +177,6 @@ function openLiftDoors(lift) {
   }, 5000);
 }
 
-function moveLift(lift) {
-  if (!lift.moving && !lift.doorsOperating) {
-    lift.moving = true;
-    moveToNextFloor(lift);
-  }
-}
-
 function moveToNextFloor(lift) {
   if (lift.doorsOperating) {
     setTimeout(() => moveToNextFloor(lift), 100);
@@ -174,7 +194,8 @@ function moveToNextFloor(lift) {
   const nextFloor =
     currentFloor < targetFloor ? currentFloor + 1 : currentFloor - 1;
   const floorHeight = 100;
-  const movement = (nextFloor - 1) * floorHeight;
+  const lowestFloor = Math.min(0, liftDataStore.floors);
+  const movement = (nextFloor - lowestFloor) * floorHeight;
 
   lift.element.style.transform = `translateY(-${movement}px)`;
 
@@ -230,7 +251,24 @@ simulateBtn.addEventListener("click", (event) => {
   const lifts = document.getElementById("input-lifts-count");
 
   const numberOfFloors = parseInt(floors.value);
-  const numberOfLifts = parseInt(lifts.value);
+  const numberOfLifts = Math.abs(parseInt(lifts.value));
+
+  if (isNaN(numberOfFloors) || isNaN(numberOfLifts)) {
+    alert("Please enter valid numbers!");
+    return;
+  }
+
+  if (numberOfFloors === 0) {
+    alert(
+      "There must be at least two floors including ground floor for simulation. Try above ground floors with positive and basement floors with negative numbers."
+    );
+    return;
+  }
+
+  if (numberOfLifts < 1) {
+    alert("There should be atleast 1 lift to simulate!");
+    return;
+  }
 
   liftDataStore.floors = numberOfFloors;
   liftDataStore.lifts = numberOfLifts;
